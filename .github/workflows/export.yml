@@ -1,0 +1,47 @@
+name: Export Web Build Zip 📦
+
+on:
+  workflow_dispatch: # Allows you to run this manually from the Actions tab
+  push:
+    tags:
+      - 'v*' # Runs automatically when you push a tag like v1.0, v1.1, etc.
+
+jobs:
+  export:
+    name: Create Zip Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Library folder
+        uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-WebGL-Export
+          restore-keys: |
+            Library-WebGL-
+
+      - name: Unity Builder
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: WebGL
+
+      - name: Package Build
+        run: |
+          # Move into the build folder so the zip doesn't have 
+          # unnecessary nested "build/WebGL" folders inside it.
+          cd build/WebGL
+          zip -r ../../web-build.zip .
+          
+      - name: Upload Zip Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: web-build.zip
