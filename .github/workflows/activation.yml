@@ -1,19 +1,23 @@
 name: Get Unity License File
 on: workflow_dispatch
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   activation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Request activation file
-        uses: game-ci/unity-builder@v4
+        # Use the specific requester action, NOT the builder
+        uses: game-ci/unity-request-activation-file@v2
         id: get_alf
-        env:
-          UNITY_LICENSE: "" # Leave empty to force ALF generation
-        with:
-          operationMode: 'AcquireActivationFile'
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Unity_v${{ steps.get_alf.outputs.unityVersion }}.alf
+          name: Unity_Activation_File
           path: ${{ steps.get_alf.outputs.filePath }}
