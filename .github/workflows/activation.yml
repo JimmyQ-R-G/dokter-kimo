@@ -5,9 +5,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: game-ci/unity-request-activation-file@v2
+      - name: Request activation file
+        uses: game-ci/unity-builder@v4
         id: get_alf
-      - uses: actions/upload-artifact@v4
+        env:
+          UNITY_LICENSE: "" # Leave empty to force ALF generation
         with:
-          name: ${{ steps.get_alf.outputs.filePath }}
+          operationMode: 'AcquireActivationFile'
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity_v${{ steps.get_alf.outputs.unityVersion }}.alf
           path: ${{ steps.get_alf.outputs.filePath }}
