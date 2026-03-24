@@ -6,6 +6,7 @@ on:
     branches: [ main ]
 
 env:
+  # Prevents the workflow from failing due to the 2026 Node.js deprecation
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -24,7 +25,7 @@ jobs:
           path: Library
           key: Library-DungeonBlox-WebGL
           restore-keys: |
-            Library-DungeonBlox-
+             Library-DungeonBlox-
 
       - name: Unity Builder
         uses: game-ci/unity-builder@v4
@@ -37,12 +38,11 @@ jobs:
 
       - name: Package Build
         run: |
-          # Ensure the directory exists before zipping
           if [ -d "build/WebGL" ]; then
             cd build/WebGL
             zip -r ../../web-build.zip .
           else
-            echo "Error: Build directory not found. Check Unity Builder logs above."
+            echo "Build folder not found. Check the Unity Builder logs above."
             exit 1
           fi
           
