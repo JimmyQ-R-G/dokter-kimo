@@ -1,10 +1,13 @@
 name: Export Web Build Zip 📦
 
 on:
-  workflow_dispatch: # Allows you to run this manually from the Actions tab
+  workflow_dispatch:
   push:
-    tags:
-      - 'v*' # Runs automatically when you push a tag like v1.0, v1.1, etc.
+    branches: [ main ]
+
+env:
+  # This fixes the Node.js 20 deprecation error
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   export:
@@ -17,7 +20,7 @@ jobs:
           lfs: true
 
       - name: Cache Library folder
-        uses: actions/cache@v3
+        uses: actions/cache@v4 # Updated to v4
         with:
           path: Library
           key: Library-WebGL-Export
@@ -35,10 +38,14 @@ jobs:
 
       - name: Package Build
         run: |
-          # Move into the build folder so the zip doesn't have 
-          # unnecessary nested "build/WebGL" folders inside it.
-          cd build/WebGL
-          zip -r ../../web-build.zip .
+          # The builder outputs to 'build/WebGL' by default
+          if [ -d "build/WebGL" ]; then
+            cd build/WebGL
+            zip -r ../../web-build.zip .
+          else
+            echo "Build directory not found!"
+            exit 1
+          fi
           
       - name: Upload Zip Artifact
         uses: actions/upload-artifact@v4
